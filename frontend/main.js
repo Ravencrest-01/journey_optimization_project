@@ -7,7 +7,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 let startPoint, endPoint;
-let traversalPolyline = null; // Store the traversal polyline
+let floodMarkers = [];  // Array to store flood fill circles
 let finalPolyline = null;
 
 // Handle map click for selecting start and end points
@@ -39,42 +39,42 @@ document.getElementById('dijkstra').addEventListener('click', function () {
     }
 });
 
-// Clear all previous paths
+// Clear all previous paths and markers
 function clearPaths() {
     if (finalPolyline) {
         map.removeLayer(finalPolyline);
         finalPolyline = null;
     }
 
-    // Clear traversal polyline
-    if (traversalPolyline) {
-        map.removeLayer(traversalPolyline);
-        traversalPolyline = null;
-    }
+    // Remove all flood fill markers
+    floodMarkers.forEach(marker => map.removeLayer(marker));
+    floodMarkers = [];  // Reset the markers array
 }
 
-// Handle real-time updates for pathfinding progress
+// Handle real-time updates for pathfinding progress (Flood Fill Effect)
 socket.on('progress', (data) => {
     const latlng = [data.lat, data.lng];
     console.log("Progress received: ", latlng);  // Debugging log
 
-    // If no traversal polyline exists, create one, otherwise add to the existing line
-    if (!traversalPolyline) {
-        traversalPolyline = L.polyline([latlng], { color: 'blue', opacity: 0.5 }).addTo(map);  // Set opacity to 0.5 for translucency
-    } else {
-        traversalPolyline.addLatLng(latlng); // Add new points to the polyline to visualize the path
-    }
+    // Create a flood fill circle for the current node
+    const floodMarker = L.circle(latlng, {
+        color: 'blue',
+        fillColor: '#30a0ff',
+        fillOpacity: 0.3,  // Semi-transparent to create the "flood" effect
+        radius: 10
+    }).addTo(map);
+
+    floodMarkers.push(floodMarker);  // Store the marker so it can be cleared later
 });
 
 // Handle completion of pathfinding
 socket.on('done', (path) => {
     console.log('Pathfinding completed:', path);
 
-    // Remove the traversal polyline and show the final path in green
-    if (traversalPolyline) {
-        map.removeLayer(traversalPolyline);
-    }
+    // Remove all flood fill markers once pathfinding is complete
+    floodMarkers.forEach(marker => map.removeLayer(marker));
+    floodMarkers = [];  // Clear the array
 
-    // Draw the final path on the map
+    // Draw the final path on the map in green
     finalPolyline = L.polyline(path.map(p => [p.lat, p.lng]), { color: 'green', weight: 5 }).addTo(map);
 });
