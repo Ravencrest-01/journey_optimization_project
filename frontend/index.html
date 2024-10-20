@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Route Finder - Chandigarh Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+</head>
+<body>
+    <h1>Route Finder</h1>
+    <div id="map"></div>
+    <div id="controls">
+        <button id="aStar">A* Algorithm</button>
+        <button id="dijkstra">Dijkstra's Algorithm</button>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- Load your main.js script at the end of the body -->
+    <script src="main.js"></script>
+</body>
+</html>

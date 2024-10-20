@@ -1,0 +1,14 @@
+{
+    "name": "route-finder",
+    "version": "1.0.0",
+    "description": "Real-time route finder using A* and Dijkstra's algorithm",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "axios": "^0.21.1",
+        "express": "^4.21.1",
+        "socket.io": "^4.0.0"
+    }
+}
