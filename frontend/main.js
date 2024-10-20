@@ -8,6 +8,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 let startPoint, endPoint;
 let floodMarkers = [];  // Array to store flood fill circles
+let floodLines = [];    // Array to store flood fill lines
 let finalPolyline = null;
 
 // Handle map click for selecting start and end points
@@ -39,16 +40,18 @@ document.getElementById('dijkstra').addEventListener('click', function () {
     }
 });
 
-// Clear all previous paths and markers
+// Clear all previous paths, flood fill lines, and markers
 function clearPaths() {
     if (finalPolyline) {
         map.removeLayer(finalPolyline);
         finalPolyline = null;
     }
 
-    // Remove all flood fill markers
+    // Remove all flood fill markers and lines
     floodMarkers.forEach(marker => map.removeLayer(marker));
+    floodLines.forEach(line => map.removeLayer(line));
     floodMarkers = [];  // Reset the markers array
+    floodLines = [];    // Reset the lines array
 }
 
 // Handle real-time updates for pathfinding progress (Flood Fill Effect)
@@ -61,19 +64,31 @@ socket.on('progress', (data) => {
         color: 'blue',
         fillColor: '#30a0ff',
         fillOpacity: 0.3,  // Semi-transparent to create the "flood" effect
-        radius: 10
+        radius: 15
     }).addTo(map);
 
     floodMarkers.push(floodMarker);  // Store the marker so it can be cleared later
+
+    // Draw a line from the start point to this flood fill node (for visual effect)
+    const floodLine = L.polyline([startPoint, latlng], {
+        color: 'red',  // Distinct color for flood lines
+        weight: 2,  // Thin line
+        opacity: 0.5,  // Semi-transparent
+        dashArray: '4,4'  // Dashed line for flood fill connections
+    }).addTo(map);
+
+    floodLines.push(floodLine);  // Store the line so it can be cleared later
 });
 
 // Handle completion of pathfinding
 socket.on('done', (path) => {
     console.log('Pathfinding completed:', path);
 
-    // Remove all flood fill markers once pathfinding is complete
+    // Remove all flood fill markers and lines once pathfinding is complete
     floodMarkers.forEach(marker => map.removeLayer(marker));
+    floodLines.forEach(line => map.removeLayer(line));
     floodMarkers = [];  // Clear the array
+    floodLines = [];    // Clear the array
 
     // Draw the final path on the map in green
     finalPolyline = L.polyline(path.map(p => [p.lat, p.lng]), { color: 'green', weight: 5 }).addTo(map);
